@@ -8,7 +8,7 @@
   <title>Envirocar Movement data</title>
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
   <link rel="stylesheet" href="dist/control.playback.css">
-  <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.0.js"></script>
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="dist/control.trackplayback.js"></script>
   <script src="dist/leaflet.trackplayback.js"></script>
@@ -21,31 +21,13 @@
   <script>
  
     datageojson = []
-
-    // [{
-    //   "lng": 133.78486666666666,
-    //   "lat": 34.34605,
-    //   "time": 1502140341,
-    //   "dir": 61.8,
-    //   "heading": 62,
-    //   "info": []
-    // }, {
-    //   "lng": 134.98611666666667,
-    //   "lat": 33.88173333333334,
-    //   "time": 1502163079,
-    //   "dir": 142.7,
-    //   "heading": 139,
-    //   "info": []
-    // }]
-
     $.ajax({
       dataType: "json",
       url: "./data/output1.geojson",
       success: function (data1) {
         prevId = ''
-        // debugger;
+
         $(data1.features).each(function (key, data2) {
-          // debugger;
           id = data2.properties['track.id'];
           lat = data2.geometry.coordinates[1]
           lng = data2.geometry.coordinates[0]
@@ -100,7 +82,7 @@
       }
 
     }).error(function () {});
-    // console.log(data);
+    
   </script>
 </body>
 

@@ -36,7 +36,7 @@
           id = data2.properties['track.id'];
           lat = data2.geometry.coordinates[1]
           lng = data2.geometry.coordinates[0]
-          time = Date.parse(data2.properties['time'])/1000
+          time = Date.parse(data2.properties['time']) / 1000
           if (prevId == '') {
             array1 = [];
             array1 = [{
@@ -62,14 +62,14 @@
                 "lat": lat,
                 "time": time,
                 "id": id
-                
+
               }]
               prevId = id
             }
           }
         });
 
-        const map = L.map('mapid').setView([51.2,6.5], 12);
+        const map = L.map('mapid').setView([51.2, 6.5], 12);
         var Stadia_AlidadeSmoothDark = L.tileLayer(
           'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
             maxZoom: 20,
@@ -91,10 +91,27 @@
         });
         const trackplaybackControl = L.trackplaybackcontrol(trackplayback);
         trackplaybackControl.addTo(map);
+        prev_track_id = '';
+        trackplayback.on('tick', e => {
+          var bufferTracks = trackplayback.clock._trackController._draw._bufferTracks[0];
+          // this json array holds all the points travelled uptill now with lat-longs, and if this is an interpolation then the interpolated point at the end.
+          var latestPoint = bufferTracks[bufferTracks.length - 1];
+          /* looks like: {"lat":12.9711727,"lng":80.2438891,"time":1564745951,"info":[{"key":"user","value":"test3"},..],"isOrigin":true} */
+
+          if (!latestPoint['isOrigin'] && bufferTracks.length > 1) {
+            // if the last element in the array is an interpolated point, then take the second-last element which will hold the last reported GPS location.
+            latestPoint = bufferTracks[bufferTracks.length - 2];
+          }
+          track_id = latestPoint['id'];
+          if (track_id != prev_track_id){
+            $('.network-ids').append(`<div>${latestPoint['id']}</div>`);
+            prev_track_id = track_id;
+          }
+          //map.setView(latestPoint); // for making the map follow the track. But danger : this is preventing rendering of the boat icon for some reason. Uncomment only if you're ok with losing that icon.
+        }, this);
       }
 
     }).error(function () {});
-    
   </script>
 </body>
 

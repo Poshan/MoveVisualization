@@ -277,16 +277,16 @@
                     isDraw: !1,
                     useCanvas: !0,
                     stroke: !1,
-                    color: "#ef0300",
+                    color: "#30abe4",
                     fill: !0,
-                    fillColor: "#ef0300",
+                    fillColor: "#30abe4",
                     opacity: .3,
-                    radius: 4
+                    radius: 1
                 },
                 trackLineOptions: {
                     isDraw: !0,
                     stroke: !0,
-                    color: "#1C54E2",
+                    color: "#e4c930",
                     weight: 2,
                     fill: !1,
                     fillColor: "#000",

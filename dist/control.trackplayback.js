@@ -92,7 +92,7 @@
         this._infoCurTime = this._createInfo("Current Time: ", this.getTimeStrFromUnix(this.trackPlayBack.getCurTime()), "info-cur-time", this._infoContainer), 
 
         this._infoSpeedRatio = this._createInfo("speed: ", `X${this.trackPlayBack.getSpeed()}`, "info-speed-ratio", this._infoContainer), this._slider = this._createSlider("time-slider", this._sliderContainer, this._scrollchange), 
-        this._networkInfo = this._createNetworkInfo("Network Information", this.getTimeStrFromUnix(this.trackPlayBack.getCurTime()), "info-cur-time", this._networkContainer), this._container
+        this._networkInfo = this._createNetworkInfo("Network Information", "", "info-cur-time", this._networkContainer), this._container
       },
       _createContainer: function (t, e) {
         return a.a.DomUtil.create("div", t, e)
@@ -126,7 +126,7 @@
       _createNetworkInfo: function(t, e, i, n){
         let o = a.a.DomUtil.create("div", "info-container1", n);
         a.a.DomUtil.create("div", "network-info-title", o).innerHTML = t;
-        let r = a.a.DomUtil.create("div", '', o);
+        let r = a.a.DomUtil.create("div", 'network-ids', o);
         return r.innerHTML = e, r
       },
       _showTrackPoint(t) {
@@ -162,7 +162,7 @@
         
         let e = this.getTimeStrFromUnix(t.time);
         this._infoCurTime.innerHTML = e,
-        this._networkInfo.innerHTML = e,
+        // this._networkInfo.innerHTML = e,
         // this._networkInfo.innerHTML = ids,    
         this._slider.value = t.time, 
         t.time >= this.trackPlayBack.getEndTime() && (a.a.DomUtil.removeClass(this._playBtn, "btn-start"), 

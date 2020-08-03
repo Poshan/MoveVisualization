@@ -19,7 +19,12 @@
     style=" position: absolute; left: 0; top: 0; right: 0; bottom: 0; width: 100%; height: 100%; overflow: hidden;">
   </div>
   <script>
- 
+    /*
+      Todo: while running the visualization:
+        1. identify the running track and plot in second map as the network node
+        2. check if there is connection in space in time with others 
+        3. if yes plot the edge between teh nodes
+    */
     datageojson = []
     $.ajax({
       dataType: "json",
@@ -37,7 +42,8 @@
             array1 = [{
               "lng": lng,
               "lat": lat,
-              "time": time
+              "time": time,
+              "id": id
             }]
             prevId = id
           } else {
@@ -45,7 +51,8 @@
               array1.push({
                 "lng": lng,
                 "lat": lat,
-                "time": time
+                "time": time,
+                "id": id
               })
             } else {
               datageojson.push(array1)
@@ -53,7 +60,9 @@
               array1 = [{
                 "lng": lng,
                 "lat": lat,
-                "time": time
+                "time": time,
+                "id": id
+                
               }]
               prevId = id
             }
@@ -67,6 +76,9 @@
             attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
           });
         Stadia_AlidadeSmoothDark.addTo(map)
+        /*
+          changing the basemap to osm
+        */
         // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         // }).addTo(map);

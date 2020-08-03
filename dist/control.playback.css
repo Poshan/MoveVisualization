@@ -1,4 +1,4 @@
-.leaflet-control-playback{position:relative;background-color:#7cbdf5;padding:10px;}
+.leaflet-control-playback{position:relative;background-color:#e4c930;padding:10px;}
 .leaflet-control-playback .optionsContainer{position:relative;}
 .leaflet-control-playback .optionsContainer > div {
     display: inline-block;
@@ -30,3 +30,7 @@
 }
 .leaflet-control-playback .infoContainer {}
 .leaflet-control-playback .sliderContainer {}
+.leaflet-control-playback .network-info-title{
+    align-content: center;
+    font-weight: bolder;
+}

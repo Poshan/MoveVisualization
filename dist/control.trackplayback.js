@@ -87,7 +87,12 @@
         return i = "d" === e ? a + "-" + o + "-" + r : "h" === e ? a + "-" + o + "-" + r + " " + s : "m" === e ? a + "-" + o + "-" + r + " " + s + ":" + c : a + "-" + o + "-" + r + " " + s + ":" + c + ":" + l
       },
       _initContainer: function () {
-        return this._container = a.a.DomUtil.create("div", "leaflet-control-playback"), a.a.DomEvent.disableClickPropagation(this._container), this._optionsContainer = this._createContainer("optionsContainer", this._container), this._buttonContainer = this._createContainer("buttonContainer", this._container), this._infoContainer = this._createContainer("infoContainer", this._container), this._sliderContainer = this._createContainer("sliderContainer", this._container), this._pointCbx = this._createCheckbox("show trackPoint", "show-trackpoint", this._optionsContainer, this._showTrackPoint), this._lineCbx = this._createCheckbox("show trackLine", "show-trackLine", this._optionsContainer, this._showTrackLine), this._playBtn = this._createButton("play", "btn-stop", this._buttonContainer, this._play), this._restartBtn = this._createButton("replay", "btn-restart", this._buttonContainer, this._restart), this._slowSpeedBtn = this._createButton("slow", "btn-slow", this._buttonContainer, this._slow), this._quickSpeedBtn = this._createButton("quick", "btn-quick", this._buttonContainer, this._quick), this._closeBtn = this._createButton("close", "btn-close", this._buttonContainer, this._close), this._infoStartTime = this._createInfo("startTime: ", this.getTimeStrFromUnix(this.trackPlayBack.getStartTime()), "info-start-time", this._infoContainer), this._infoEndTime = this._createInfo("endTime: ", this.getTimeStrFromUnix(this.trackPlayBack.getEndTime()), "info-end-time", this._infoContainer), this._infoCurTime = this._createInfo("curTime: ", this.getTimeStrFromUnix(this.trackPlayBack.getCurTime()), "info-cur-time", this._infoContainer), this._infoSpeedRatio = this._createInfo("speed: ", `X${this.trackPlayBack.getSpeed()}`, "info-speed-ratio", this._infoContainer), this._slider = this._createSlider("time-slider", this._sliderContainer, this._scrollchange), this._container
+        return this._container = a.a.DomUtil.create("div", "leaflet-control-playback"), a.a.DomEvent.disableClickPropagation(this._container), this._optionsContainer = this._createContainer("optionsContainer", this._container), this._buttonContainer = this._createContainer("buttonContainer", this._container), this._infoContainer = this._createContainer("infoContainer", this._container), this._sliderContainer = this._createContainer("sliderContainer", this._container), this._networkContainer = this._createContainer("networkContainer", this._container), this._pointCbx = this._createCheckbox("Show Track Point", "show-trackpoint", this._optionsContainer, this._showTrackPoint), this._lineCbx = this._createCheckbox("Show Track Line", "show-trackLine", this._optionsContainer, this._showTrackLine), this._playBtn = this._createButton("play", "btn-stop", this._buttonContainer, this._play), this._restartBtn = this._createButton("replay", "btn-restart", this._buttonContainer, this._restart), this._slowSpeedBtn = this._createButton("slow", "btn-slow", this._buttonContainer, this._slow), this._quickSpeedBtn = this._createButton("quick", "btn-quick", this._buttonContainer, this._quick), this._infoStartTime = this._createInfo("Start Time: ", this.getTimeStrFromUnix(this.trackPlayBack.getStartTime()), "info-start-time", this._infoContainer), this._infoEndTime = this._createInfo("End Time: ", this.getTimeStrFromUnix(this.trackPlayBack.getEndTime()), "info-end-time", this._infoContainer), 
+
+        this._infoCurTime = this._createInfo("Current Time: ", this.getTimeStrFromUnix(this.trackPlayBack.getCurTime()), "info-cur-time", this._infoContainer), 
+
+        this._infoSpeedRatio = this._createInfo("speed: ", `X${this.trackPlayBack.getSpeed()}`, "info-speed-ratio", this._infoContainer), this._slider = this._createSlider("time-slider", this._sliderContainer, this._scrollchange), 
+        this._networkInfo = this._createNetworkInfo("Network Information", this.getTimeStrFromUnix(this.trackPlayBack.getCurTime()), "info-cur-time", this._networkContainer), this._container
       },
       _createContainer: function (t, e) {
         return a.a.DomUtil.create("div", t, e)
@@ -96,6 +101,10 @@
         let o = a.a.DomUtil.create("div", e + " trackplayback-checkbox", i),
           r = a.a.DomUtil.create("input", "trackplayback-input", o),
           s = `trackplayback-input-${a.a.Util.stamp(r)}`;
+          // set the show track line checked 
+          if (e == "show-trackLine"){
+            r.checked = true;
+          }
         r.setAttribute("type", "checkbox"), r.setAttribute("id", s);
         let c = a.a.DomUtil.create("label", "trackplayback-label", o);
         return c.setAttribute("for", s), c.innerHTML = t, a.a.DomEvent.on(r, "change", n, this), o
@@ -113,6 +122,12 @@
       _createSlider: function (t, e, i) {
         let n = a.a.DomUtil.create("input", t, e);
         return n.setAttribute("type", "range"), n.setAttribute("min", this.trackPlayBack.getStartTime()), n.setAttribute("max", this.trackPlayBack.getEndTime()), n.setAttribute("value", this.trackPlayBack.getCurTime()), a.a.DomEvent.on(n, "click mousedown dbclick", a.a.DomEvent.stopPropagation).on(n, "click", a.a.DomEvent.preventDefault).on(n, "change", i, this).on(n, "mousemove", i, this), n
+      },
+      _createNetworkInfo: function(t, e, i, n){
+        let o = a.a.DomUtil.create("div", "info-container1", n);
+        a.a.DomUtil.create("div", "network-info-title", o).innerHTML = t;
+        let r = a.a.DomUtil.create("div", '', o);
+        return r.innerHTML = e, r
       },
       _showTrackPoint(t) {
         t.target.checked ? this.trackPlayBack.showTrackPoint() : this.trackPlayBack.hideTrackPoint()
@@ -144,8 +159,16 @@
         this.trackPlayBack.setCursor(e)
       },
       _tickCallback: function (t) {
+        
         let e = this.getTimeStrFromUnix(t.time);
-        this._infoCurTime.innerHTML = e, this._slider.value = t.time, t.time >= this.trackPlayBack.getEndTime() && (a.a.DomUtil.removeClass(this._playBtn, "btn-start"), a.a.DomUtil.addClass(this._playBtn, "btn-stop"), this._playBtn.setAttribute("title", "play"), this.trackPlayBack.stop())
+        this._infoCurTime.innerHTML = e,
+        this._networkInfo.innerHTML = e,
+        // this._networkInfo.innerHTML = ids,    
+        this._slider.value = t.time, 
+        t.time >= this.trackPlayBack.getEndTime() && (a.a.DomUtil.removeClass(this._playBtn, "btn-start"), 
+        a.a.DomUtil.addClass(this._playBtn, "btn-stop"), 
+        this._playBtn.setAttribute("title", "play"), 
+        this.trackPlayBack.stop())
       }
     });
     a.a.TrackPlayBackControl = o, a.a.trackplaybackcontrol = function (t, e) {

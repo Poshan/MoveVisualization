@@ -199,7 +199,9 @@
                     this._intervalID && (n.a.Util.cancelAnimFrame(this._intervalID), this._intervalID = null, this._lastFpsUpdateTime = 0)
                 },
                 rePlaying: function () {
-                    this.stop(), this._curTime = this._trackController.getMinTime(), this.start()
+                    this.stop(),
+                    this._curTime = this._trackController.getMinTime(), 
+                    this.start()
                 },
                 slowSpeed: function () {
                     this._speed = this._speed <= 1 ? this._speed : this._speed - 1, this._intervalID && (this.stop(), this.start())

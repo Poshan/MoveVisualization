@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Envirocar Movement data</title>
+  <link rel="stylesheet" href="default.css">
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
   <link rel="stylesheet" href="dist/control.playback.css">
   <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
@@ -17,6 +18,10 @@
 <body>
   <div id='mapid'
     style=" position: absolute; left: 0; top: 0; right: 0; bottom: 0; width: 100%; height: 100%; overflow: hidden;">
+  </div>
+  <div class = "network">
+    <h2>Network Information</h2> 
+    <div id = "network-info"></div>
   </div>
   <script>
     /*
@@ -82,7 +87,17 @@
         // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         // }).addTo(map);
-
+        getTimeStrFromUnix = function (t, e = "s") {
+        t = parseInt(1e3 * t);
+        let i, n = new Date(t),
+          a = n.getFullYear(),
+          o = n.getMonth() + 1 < 10 ? "0" + (n.getMonth() + 1) : n.getMonth() + 1,
+          r = n.getDate() < 10 ? "0" + n.getDate() : n.getDate(),
+          s = n.getHours() < 10 ? "0" + n.getHours() : n.getHours(),
+          c = n.getMinutes() < 10 ? "0" + n.getMinutes() : n.getMinutes(),
+          l = n.getSeconds() < 10 ? "0" + n.getSeconds() : n.getSeconds();
+        return i = "d" === e ? a + "-" + o + "-" + r : "h" === e ? a + "-" + o + "-" + r + " " + s : "m" === e ? a + "-" + o + "-" + r + " " + s + ":" + c : a + "-" + o + "-" + r + " " + s + ":" + c + ":" + l
+      }
         const trackplayback = L.trackplayback(datageojson, map, {
           targetOptions: {
             useImg: true,
@@ -93,10 +108,10 @@
         trackplaybackControl.addTo(map);
         prev_track_id = '';
         trackplayback.on('tick', e => {
+          // $('.network-ids').html(``);
           var bufferTracks = trackplayback.clock._trackController._draw._bufferTracks[0];
           // this json array holds all the points travelled uptill now with lat-longs, and if this is an interpolation then the interpolated point at the end.
           var latestPoint = bufferTracks[bufferTracks.length - 1];
-          /* looks like: {"lat":12.9711727,"lng":80.2438891,"time":1564745951,"info":[{"key":"user","value":"test3"},..],"isOrigin":true} */
 
           if (!latestPoint['isOrigin'] && bufferTracks.length > 1) {
             // if the last element in the array is an interpolated point, then take the second-last element which will hold the last reported GPS location.
@@ -104,7 +119,10 @@
           }
           track_id = latestPoint['id'];
           if (track_id != prev_track_id){
-            $('.network-ids').append(`<div>${latestPoint['id']}</div>`);
+            $('.network #network-info').append(
+              `<div>${latestPoint['id']}</div>
+              <div>${getTimeStrFromUnix(latestPoint['time'])}</div>`
+              );
             prev_track_id = track_id;
           }
           //map.setView(latestPoint); // for making the map follow the track. But danger : this is preventing rendering of the boat icon for some reason. Uncomment only if you're ok with losing that icon.

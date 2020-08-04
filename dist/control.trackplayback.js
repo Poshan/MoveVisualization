@@ -92,7 +92,7 @@
         this._infoCurTime = this._createInfo("Current Time: ", this.getTimeStrFromUnix(this.trackPlayBack.getCurTime()), "info-cur-time", this._infoContainer), 
 
         this._infoSpeedRatio = this._createInfo("speed: ", `X${this.trackPlayBack.getSpeed()}`, "info-speed-ratio", this._infoContainer), this._slider = this._createSlider("time-slider", this._sliderContainer, this._scrollchange), 
-        this._networkInfo = this._createNetworkInfo("Network Information", "", "info-cur-time", this._networkContainer), this._container
+        this._container
       },
       _createContainer: function (t, e) {
         return a.a.DomUtil.create("div", t, e)
@@ -123,12 +123,6 @@
         let n = a.a.DomUtil.create("input", t, e);
         return n.setAttribute("type", "range"), n.setAttribute("min", this.trackPlayBack.getStartTime()), n.setAttribute("max", this.trackPlayBack.getEndTime()), n.setAttribute("value", this.trackPlayBack.getCurTime()), a.a.DomEvent.on(n, "click mousedown dbclick", a.a.DomEvent.stopPropagation).on(n, "click", a.a.DomEvent.preventDefault).on(n, "change", i, this).on(n, "mousemove", i, this), n
       },
-      _createNetworkInfo: function(t, e, i, n){
-        let o = a.a.DomUtil.create("div", "info-container1", n);
-        a.a.DomUtil.create("div", "network-info-title", o).innerHTML = t;
-        let r = a.a.DomUtil.create("div", 'network-ids', o);
-        return r.innerHTML = e, r
-      },
       _showTrackPoint(t) {
         t.target.checked ? this.trackPlayBack.showTrackPoint() : this.trackPlayBack.hideTrackPoint()
       },
@@ -139,7 +133,12 @@
         a.a.DomUtil.hasClass(this._playBtn, "btn-stop") ? (a.a.DomUtil.removeClass(this._playBtn, "btn-stop"), a.a.DomUtil.addClass(this._playBtn, "btn-start"), this._playBtn.setAttribute("title", "stop"), this.trackPlayBack.start()) : (a.a.DomUtil.removeClass(this._playBtn, "btn-start"), a.a.DomUtil.addClass(this._playBtn, "btn-stop"), this._playBtn.setAttribute("title", "play"), this.trackPlayBack.stop())
       },
       _restart: function () {
-        a.a.DomUtil.removeClass(this._playBtn, "btn-stop"), a.a.DomUtil.addClass(this._playBtn, "btn-start"), this._playBtn.setAttribute("title", "stop"), this.trackPlayBack.rePlaying()
+        a.a.DomUtil.removeClass(this._playBtn, "btn-stop"), 
+        a.a.DomUtil.addClass(this._playBtn, "btn-start"), 
+        this._playBtn.setAttribute("title", "stop"), 
+        this.trackPlayBack.rePlaying(),
+        // removing the contents in the exisitng div
+        $('.network #network-info').html(``);
       },
       _slow: function () {
         this.trackPlayBack.slowSpeed();
@@ -161,9 +160,7 @@
       _tickCallback: function (t) {
         
         let e = this.getTimeStrFromUnix(t.time);
-        this._infoCurTime.innerHTML = e,
-        // this._networkInfo.innerHTML = e,
-        // this._networkInfo.innerHTML = ids,    
+        this._infoCurTime.innerHTML = e,   
         this._slider.value = t.time, 
         t.time >= this.trackPlayBack.getEndTime() && (a.a.DomUtil.removeClass(this._playBtn, "btn-start"), 
         a.a.DomUtil.addClass(this._playBtn, "btn-stop"), 

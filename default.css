@@ -1,10 +1,11 @@
 .network{
+  display: block;
   position: absolute;
   top: 250px;
   left: 0px;
   margin-left: 10px;
   padding-left: 0px;
-  background-color: #e4c930;
+  background-color:#e4c930;
   text-align: left;
   overflow-y: scroll;
   z-index: 10000;
@@ -14,18 +15,72 @@
 
 .network h2{
   width: auto;
-  text-align: left;
+  text-align: center;
   margin: 2px 2px 2px 2px;
 
   /* background-color: #ffffff */
   color: #fff;
 }
-.network>#network-info{
-  width: auto;
-  text-align: left;
-  /* background-color: #ffffff; */
-  /* margin-top: 1px; */
-  padding-left: 1px;
-  margin-bottom: 1px;
 
+
+/* table css */
+main {
+  display: flex;
+  flex-direction: column;
+  padding: 0em;
+  align-items: center;
+}
+
+.table-wrapper {
+  overflow: auto;
+  max-width: 100%;
+  background: linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 0 100%,
+    radial-gradient(
+      farthest-side at 0% 50%,
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0)
+    ),
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0)
+      )
+      0 100%;
+  background-repeat: no-repeat;
+  background-color: white;
+  /* background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-position: 0 0, 100%, 0 0, 100%;
+  background-attachment: local, local, scroll, scroll; */
+}
+
+tr {
+  border-bottom: 1px solid #92ec55 !important;
+}
+
+th {
+  background-color: #634976;
+  color: #fff;
+  white-space: nowrap;
+  cursor: pointer;
+  text-align: center;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5em 0.5em;
+  font-size: 12px;
+  border-bottom: 1px solid #555 !important;
+}
+
+input[type=search] {
+  border: 1px solid;
+  font-size: initial;
+  margin-bottom: 1em;
+  padding: 0.25em;
+}
+
+.hidden {
+  display: none;
 }

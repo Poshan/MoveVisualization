@@ -19,9 +19,30 @@
   <div id='mapid'
     style=" position: absolute; left: 0; top: 0; right: 0; bottom: 0; width: 100%; height: 100%; overflow: hidden;">
   </div>
-  <div class = "network">
-    <h2>Network Information</h2> 
-    <div id = "network-info"></div>
+  <div class="network">
+    <h2>Network Information</h2>
+    <div id="network-info">
+      <main>
+        <!-- <label>
+          <span>Search:</span>
+          <input placeholder="Enter search term" type="search" id="searchInput">
+        </label> -->
+        <div class="table-wrapper">
+          <table id="filterTable">
+            <thead>
+              <tr>
+                <th data-type="text">Track ID</th>
+                <th data-type="text">Start Time</th>
+                <th data-type="text">End Time</th>
+              </tr>
+            </thead>
+            <tbody id="network-infos">
+
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
   </div>
   <script>
     /*
@@ -74,7 +95,7 @@
           }
         });
 
-        const map = L.map('mapid').setView([51.2, 6.5], 12);
+        const map = L.map('mapid').setView([51.18, 6.4], 12);
         var Stadia_AlidadeSmoothDark = L.tileLayer(
           'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
             maxZoom: 20,
@@ -88,16 +109,18 @@
         //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         // }).addTo(map);
         getTimeStrFromUnix = function (t, e = "s") {
-        t = parseInt(1e3 * t);
-        let i, n = new Date(t),
-          a = n.getFullYear(),
-          o = n.getMonth() + 1 < 10 ? "0" + (n.getMonth() + 1) : n.getMonth() + 1,
-          r = n.getDate() < 10 ? "0" + n.getDate() : n.getDate(),
-          s = n.getHours() < 10 ? "0" + n.getHours() : n.getHours(),
-          c = n.getMinutes() < 10 ? "0" + n.getMinutes() : n.getMinutes(),
-          l = n.getSeconds() < 10 ? "0" + n.getSeconds() : n.getSeconds();
-        return i = "d" === e ? a + "-" + o + "-" + r : "h" === e ? a + "-" + o + "-" + r + " " + s : "m" === e ? a + "-" + o + "-" + r + " " + s + ":" + c : a + "-" + o + "-" + r + " " + s + ":" + c + ":" + l
-      }
+          t = parseInt(1e3 * t);
+          let i, n = new Date(t),
+            a = n.getFullYear(),
+            o = n.getMonth() + 1 < 10 ? "0" + (n.getMonth() + 1) : n.getMonth() + 1,
+            r = n.getDate() < 10 ? "0" + n.getDate() : n.getDate(),
+            s = n.getHours() < 10 ? "0" + n.getHours() : n.getHours(),
+            c = n.getMinutes() < 10 ? "0" + n.getMinutes() : n.getMinutes(),
+            l = n.getSeconds() < 10 ? "0" + n.getSeconds() : n.getSeconds();
+          return i = "d" === e ? a + "-" + o + "-" + r : "h" === e ? a + "-" + o + "-" + r + " " + s : "m" ===
+            e ? a + "-" + o + "-" + r + " " + s + ":" + c : a + "-" + o + "-" + r + " " + s + ":" + c + ":" +
+            l
+        }
         const trackplayback = L.trackplayback(datageojson, map, {
           targetOptions: {
             useImg: true,
@@ -112,20 +135,51 @@
           var bufferTracks = trackplayback.clock._trackController._draw._bufferTracks[0];
           // this json array holds all the points travelled uptill now with lat-longs, and if this is an interpolation then the interpolated point at the end.
           var latestPoint = bufferTracks[bufferTracks.length - 1];
-
+          // console.log(latestPoint);
           if (!latestPoint['isOrigin'] && bufferTracks.length > 1) {
             // if the last element in the array is an interpolated point, then take the second-last element which will hold the last reported GPS location.
             latestPoint = bufferTracks[bufferTracks.length - 2];
           }
           track_id = latestPoint['id'];
-          if (track_id != prev_track_id){
-            $('.network #network-info').append(
-              `<div>${latestPoint['id']}</div>
-              <div>${getTimeStrFromUnix(latestPoint['time'])}</div>`
-              );
+
+          if (prev_track_id == '') {
+            time_array = [];
+            time_array.push(getTimeStrFromUnix(latestPoint['time']));
             prev_track_id = track_id;
+          } else {
+            if (track_id == prev_track_id) {
+              time_array.push(getTimeStrFromUnix(latestPoint['time']));
+            } else {
+              $('.network #network-infos').append(
+                `<tr><td>${track_id.slice(18,23)}</td>
+                <td>${time_array[0]}</td>
+                <td>${time_array[time_array.length-1]}</td></tr>`
+              );
+              1
+              time_array = [];
+              prev_track_id = track_id;
+            }
           }
           //map.setView(latestPoint); // for making the map follow the track. But danger : this is preventing rendering of the boat icon for some reason. Uncomment only if you're ok with losing that icon.
+          // table search
+          // const searchInput = document.getElementById('searchInput')
+          // const table = document.getElementById('filterTable')
+          // const trArray = Array.prototype.slice.call(table.querySelectorAll('tbody tr'))
+
+          // const filterTable = event => {
+          //   const searchTerm = event.target.value.toLowerCase()
+          //   trArray.forEach(row => {
+          //     row.classList.add('hidden')
+          //     const tdArray = Array.prototype.slice.call(row.getElementsByTagName('td'))
+          //     tdArray.forEach(cell => {
+          //       if (cell.innerText.toLowerCase().indexOf(searchTerm) > -1) {
+          //         row.classList.remove('hidden')
+          //       }
+          //     })
+          //   })
+          // }
+
+          // searchInput.addEventListener('keyup', filterTable, false)
         }, this);
       }
 

@@ -138,7 +138,7 @@
         this._playBtn.setAttribute("title", "stop"), 
         this.trackPlayBack.rePlaying(),
         // removing the contents in the exisitng div
-        $('.network #network-info').html(``);
+        $('.network #network-infos').html(``);
       },
       _slow: function () {
         this.trackPlayBack.slowSpeed();

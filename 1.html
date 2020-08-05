@@ -10,9 +10,11 @@
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
   <link rel="stylesheet" href="dist/control.playback.css">
   <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="dist/control.trackplayback.js"></script>
   <script src="dist/leaflet.trackplayback.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
 </head>
 
 <body>
@@ -44,7 +46,171 @@
       </main>
     </div>
   </div>
+  <div id="network-vis">
+    <h1>Network Visualizatoin</h1>
+  </div>
   <script>
+    function checkSpatialIntersection(l1, l2) {
+      intersection = turf.lineIntersect(l1.toGeoJSON(), l2.toGeoJSON());
+      return intersection;
+    }
+
+    function constructNetwork(id, lines, times) {
+      /*
+        1. construct nodes
+        2. To construct the links 
+          2.1 calculate if they have similar time period
+          2.2 check if they intersect with turf js
+        3. plot with D3
+      */
+      nodes = [];
+      edges = [];
+      for (let index = 0; index < id.length; index++) {
+        const ids = id[index];
+        const line = lines[index];
+        nodes.push({
+          "group": index,
+          "name": ids,
+          "Line": line
+        })
+        for (let jndex = 0; jndex < id.length; jndex++) {
+          const i_min_time = times[index][0];
+          const i_max_time = times[index][1];
+          const j_min_time = times[jndex][0];
+          const j_max_time = times[jndex][1];
+
+          // console.log(`checking between ${i_min_time} to ${i_max_time} and ${j_min_time} to ${j_max_time}`)
+
+          if ((j_min_time >= i_min_time && j_min_time <= i_max_time) || (j_max_time >= i_min_time && j_max_time <=
+              i_max_time)) {
+
+            if (index != jndex) {
+              intersection = checkSpatialIntersection(lines[index], lines[jndex]).features
+              if (intersection.length > 0) {
+                // push to edges
+              }
+              edges.push({
+                "target": id[index],
+                "source": id[jndex],
+                "value":1
+              })
+            }
+
+          }
+        }
+      }
+      network = {
+        "nodes": nodes,
+        "edges": edges
+      }
+
+      return network;
+    }
+
+    function plotNetwork(net) {
+
+      var width = 250,
+        height = 250;
+
+      var color = d3.scale.category20();
+
+      var force = d3.layout.force()
+        .charge(-120)
+        .linkDistance(30)
+        .size([width, height]);
+
+      var svg = d3.select("#network-vis").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      var graph = net;
+      var nodeMap = {};
+
+      graph.nodes.forEach(function (d) {
+        nodeMap[d.name] = d;
+      });
+
+      graph.edges.forEach(function (l) {
+        l.source = nodeMap[l.source];
+        l.target = nodeMap[l.target];
+      })
+
+      force.nodes(graph.nodes)
+        .links(graph.edges)
+        .start();
+
+      var link = svg.selectAll(".link")
+        .data(graph.edges)
+        .enter().append("line")
+        .attr("class", "link")
+        .style("stroke-width", function (d) {
+          return Math.sqrt(d.value) + 1;
+        });
+
+      var node = svg.selectAll(".node")
+        .data(graph.nodes)
+        .enter().append("circle")
+        .attr("class", "node")
+        .attr("r", 5)
+        .style("fill", function (d) {
+          return color(d.group);
+        })
+        .call(force.drag);
+
+
+      node.append("title")
+        .text(function (d) {
+          return d.name;
+        });
+
+      force.on("tick", function () {
+        link.attr("x1", function (d) {
+            return d.source.x;
+          })
+          .attr("y1", function (d) {
+            return d.source.y;
+          })
+          .attr("x2", function (d) {
+            return d.target.x;
+          })
+          .attr("y2", function (d) {
+            return d.target.y;
+          });
+
+        node.attr("cx", function (d) {
+            return d.x;
+          })
+          .attr("cy", function (d) {
+            return d.y;
+          });
+      });
+
+    }
+
+
+    function plot(t) {
+      // console.log('plotting')
+      for (i = 0; i < t.length; i++) {
+        for (j = i + 1; j < t.length; j++) {
+
+          // comapre i and j
+          a_id = t[i]['id']
+          b_id = t[j]['id']
+          a_min = t[i]['Min Time']
+          a_max = t[i]['Max Time']
+          b_min = t[j]['Min Time']
+          b_max = t[j]['Max Time']
+          // console.log(`comparing ${a_id} with time from ${a_min} and ${a_max}`)
+          // console.log(`comparing ${b_id} with time from ${b_min} and ${b_max}`)
+
+          if ((b_min > a_min && b_min < a_max) || (b_max > a_min && b_max < a_max)) {
+            console.log(`${a_id} and ${b_id} concide in time`)
+          }
+
+        }
+      }
+      // check minimum and max time of t
+    }
     /*
       Todo: while running the visualization:
         1. identify the running track and plot in second map as the network node
@@ -56,21 +222,25 @@
       dataType: "json",
       url: "./data/output1.geojson",
       success: function (data1) {
+        // debugger;
         prevId = ''
-
+        i = 0;
+        len = data1.features.length;
         $(data1.features).each(function (key, data2) {
           id = data2.properties['track.id'];
+
           lat = data2.geometry.coordinates[1]
           lng = data2.geometry.coordinates[0]
           time = Date.parse(data2.properties['time']) / 1000
+          /*For same id putting lat lngs together*/
           if (prevId == '') {
             array1 = [];
-            array1 = [{
+            array1.push({
               "lng": lng,
               "lat": lat,
               "time": time,
               "id": id
-            }]
+            })
             prevId = id
           } else {
             if (prevId == id) {
@@ -83,17 +253,22 @@
             } else {
               datageojson.push(array1)
               array1 = [];
-              array1 = [{
+              array1.push({
                 "lng": lng,
                 "lat": lat,
                 "time": time,
                 "id": id
-
-              }]
+              })
               prevId = id
             }
           }
+          /*addressing the last element*/
+          if (i == len - 1) {
+            datageojson.push(array1)
+          }
+          i++
         });
+        // console.log(datageojson);
 
         const map = L.map('mapid').setView([51.18, 6.4], 12);
         var Stadia_AlidadeSmoothDark = L.tileLayer(
@@ -130,57 +305,75 @@
         const trackplaybackControl = L.trackplaybackcontrol(trackplayback);
         trackplaybackControl.addTo(map);
         prev_track_id = '';
+        time_comparision = [];
+        new_t = {};
+        prev_l = 0;
+
+        ids = [];
+        plines = [];
+        times = [];
+        // console.log(trackplayback)
+        tracks = trackplayback.clock._trackController._tracks
+        // console.log(tracks)
+        tracks.forEach(track => {
+          points = track._trackPoints
+          ids.push(points[0]['id']);
+          p = []
+          t = []
+          points.forEach(point => {
+            // debugger;
+            p.push(L.latLng(point['lat'], point['lng']))
+            t.push(point['time']);
+          });
+          // L.polyline(p).addTo(map)
+          plines.push(L.polyline(p))
+          times.push([t[0], t[t.length - 1]])
+        });
+        // console.log(ids)
+        // console.log(plines)
+        // console.log(times)
+        network = constructNetwork(ids, plines, times);
+        plotNetwork(network);
         trackplayback.on('tick', e => {
-          // $('.network-ids').html(``);
           var bufferTracks = trackplayback.clock._trackController._draw._bufferTracks[0];
-          // this json array holds all the points travelled uptill now with lat-longs, and if this is an interpolation then the interpolated point at the end.
           var latestPoint = bufferTracks[bufferTracks.length - 1];
-          // console.log(latestPoint);
+
           if (!latestPoint['isOrigin'] && bufferTracks.length > 1) {
-            // if the last element in the array is an interpolated point, then take the second-last element which will hold the last reported GPS location.
             latestPoint = bufferTracks[bufferTracks.length - 2];
           }
-          track_id = latestPoint['id'];
 
+          track_id = latestPoint['id'];
           if (prev_track_id == '') {
             time_array = [];
-            time_array.push(getTimeStrFromUnix(latestPoint['time']));
+            time_array.push(latestPoint['time']);
             prev_track_id = track_id;
+
           } else {
             if (track_id == prev_track_id) {
-              time_array.push(getTimeStrFromUnix(latestPoint['time']));
+              time_array.push(latestPoint['time']);
             } else {
+              // debugger;
+              time_comparision.push({
+                "id": prev_track_id,
+                "Min Time": time_array[0],
+                "Max Time": time_array[time_array.length - 1]
+              })
+              // console.log(time_comparision);
+              plot(time_comparision);
+              // $('.network #network-infos').html(``);
               $('.network #network-infos').append(
-                `<tr><td>${track_id.slice(18,23)}</td>
-                <td>${time_array[0]}</td>
-                <td>${time_array[time_array.length-1]}</td></tr>`
+                // `<tr><td>${prev_track_id.slice(18,23)}</td>
+                `<tr><td>${prev_track_id}</td>
+                <td>${getTimeStrFromUnix((time_array[0]))}</td>
+                <td>${getTimeStrFromUnix((time_array[time_array.length-1]))}</td></tr>`
               );
-              1
               time_array = [];
               prev_track_id = track_id;
             }
           }
           //map.setView(latestPoint); // for making the map follow the track. But danger : this is preventing rendering of the boat icon for some reason. Uncomment only if you're ok with losing that icon.
-          // table search
-          // const searchInput = document.getElementById('searchInput')
-          // const table = document.getElementById('filterTable')
-          // const trArray = Array.prototype.slice.call(table.querySelectorAll('tbody tr'))
-
-          // const filterTable = event => {
-          //   const searchTerm = event.target.value.toLowerCase()
-          //   trArray.forEach(row => {
-          //     row.classList.add('hidden')
-          //     const tdArray = Array.prototype.slice.call(row.getElementsByTagName('td'))
-          //     tdArray.forEach(cell => {
-          //       if (cell.innerText.toLowerCase().indexOf(searchTerm) > -1) {
-          //         row.classList.remove('hidden')
-          //       }
-          //     })
-          //   })
-          // }
-
-          // searchInput.addEventListener('keyup', filterTable, false)
         }, this);
+
       }
 
     }).error(function () {});

@@ -186,7 +186,7 @@
             h = n.a.Class.extend({
                 includes: n.a.Mixin.Events,
                 options: {
-                    speed: 15,
+                    speed: 8,
                     maxSpeed: 65
                 },
                 initialize: function (t, i) {

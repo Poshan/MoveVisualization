@@ -1,6 +1,18 @@
 #wrapper {
   position: absolute;
 }
+#opener{
+  position: absolute;
+  top: 20px;
+  left: 50px;
+  z-index: 10000;
+}
+.ui-widget-header,.ui-state-default, ui-button{  
+  background:#e4c930;  
+  border: 1px solid #b9cd6d;  
+  color: #FFFFFF;  
+  font-weight: bold;  
+}
 .node {
   stroke: #fff;
   stroke-width: 1.5px;
@@ -25,18 +37,19 @@
   clear: left;
 }
 #network-vis{
-  display: block;
-  position: absolute;
+  display: none;
+  /* position: absolute;
   top: 250px;
   left: 380px;
   margin-left: 10px;
   padding-left: 0px;
-  background-color:#e4c930;
+  
   text-align: left;
-  overflow-y: scroll;
-  z-index: 10000;
-  width: 360px;
-  height: 360px;
+  overflow-y: scroll; */
+  z-index: 1000000;
+  background-color:#e4c930;
+  width: 500px;
+  height: 500px;
 }
 
 .network{

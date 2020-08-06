@@ -22,7 +22,7 @@
 </head>
 
 <body>
-  <button id="opener" title="Network Graph">Open Graph</button>
+  <button id="opener" title="Network Graph">Open Graph View</button>
   <div id="network-vis">
   </div>
   <div id='mapid'
@@ -140,7 +140,7 @@
 
     function plotNetwork(net) {
 
-      var width = 340,
+      var width = 300,
         height = 250;
 
       var color = d3.scale.category20();
@@ -218,36 +218,23 @@
 
     }
 
+    findTracksAtTime = function(ids, times, time_now){
+      existingTracks = []
+      for (let index = 0; index < times.length; index++) {
 
-    function plot(t) {
-      // console.log('plotting')
-      for (i = 0; i < t.length; i++) {
-        for (j = i + 1; j < t.length; j++) {
+        min_time = times[index][0];
 
-          // comapre i and j
-          a_id = t[i]['id']
-          b_id = t[j]['id']
-          a_min = t[i]['Min Time']
-          a_max = t[i]['Max Time']
-          b_min = t[j]['Min Time']
-          b_max = t[j]['Max Time']
-          // console.log(`comparing ${a_id} with time from ${a_min} and ${a_max}`)
-          // console.log(`comparing ${b_id} with time from ${b_min} and ${b_max}`)
-
-          if ((b_min > a_min && b_min < a_max) || (b_max > a_min && b_max < a_max)) {
-            console.log(`${a_id} and ${b_id} concide in time`)
-          }
-
+        if (time_now >= min_time){
+          existingTracks.push([ids[index], min_time, times[index][1]])
         }
+        else{
+          break;
+        }
+        
       }
-      // check minimum and max time of t
+      return existingTracks
     }
-    /*
-      Todo: while running the visualization:
-        1. identify the running track and plot in second map as the network node
-        2. check if there is connection in space in time with others 
-        3. if yes plot the edge between teh nodes
-    */
+
     datageojson = []
     $.ajax({
       dataType: "json",
@@ -359,50 +346,33 @@
           // L.polyline(p).addTo(map)
           plines.push(L.polyline(p))
           times.push([t[0], t[t.length - 1]])
+          // sorting based on the miniumum time
+          times.sort(function(a,b){
+            return a[0]-b[0]
+          })
         });
-        // console.log(ids)
-        // console.log(plines)
-        // console.log(times)
+
         network = constructNetwork(ids, plines, times);
         plotNetwork(network);
+
         trackplayback.on('tick', e => {
-          var bufferTracks = trackplayback.clock._trackController._draw._bufferTracks[0];
-          var latestPoint = bufferTracks[bufferTracks.length - 1];
+          time_now = e.time;
+          /* 
+          find the tracks which are within the time
+          put that in the network information
+          */
+          $('.network #network-infos').html(``);
+          // console.log(findTracksAtTime(ids, times, time_now));
+          trajectories = findTracksAtTime(ids, times, time_now);
 
-          if (!latestPoint['isOrigin'] && bufferTracks.length > 1) {
-            latestPoint = bufferTracks[bufferTracks.length - 2];
-          }
-
-          track_id = latestPoint['id'];
-          if (prev_track_id == '') {
-            time_array = [];
-            time_array.push(latestPoint['time']);
-            prev_track_id = track_id;
-
-          } else {
-            if (track_id == prev_track_id) {
-              time_array.push(latestPoint['time']);
-            } else {
-              // debugger;
-              time_comparision.push({
-                "id": prev_track_id,
-                "Min Time": time_array[0],
-                "Max Time": time_array[time_array.length - 1]
-              })
-              // console.log(time_comparision);
-              plot(time_comparision);
-              // $('.network #network-infos').html(``);
-              $('.network #network-infos').append(
-                // `<tr><td>${prev_track_id.slice(18,23)}</td>
-                `<tr><td>${prev_track_id}</td>
-                <td>${getTimeStrFromUnix((time_array[0]))}</td>
-                <td>${getTimeStrFromUnix((time_array[time_array.length-1]))}</td></tr>`
-              );
-              time_array = [];
-              prev_track_id = track_id;
-            }
-          }
-          //map.setView(latestPoint); // for making the map follow the track. But danger : this is preventing rendering of the boat icon for some reason. Uncomment only if you're ok with losing that icon.
+          trajectories.forEach(element => {
+            $('.network #network-infos').append(
+              // `<tr><td>${prev_track_id.slice(18,23)}</td>
+              `<tr><td>${element[0]}</td>
+              <td>${getTimeStrFromUnix(element[1])}</td>
+              <td>${getTimeStrFromUnix(element[2])}</td></tr>`
+            );
+          });
         }, this);
 
       }

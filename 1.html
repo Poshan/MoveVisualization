@@ -53,11 +53,11 @@
       </main>
     </div>
   </div>
-  
+
   <script>
-    // bootstrap collapse
+    // bootstrap collapse for network graph view
     $(function () {
-      
+
       $("#network-vis").dialog({
         autoOpen: false,
         show: {
@@ -73,14 +73,14 @@
       $("#opener").on("click", function () {
         $('.ui-dialog-title').html("Network Graph Visualization")
         $("#network-vis").dialog("open");
-        $("#network-vis").css("overflow","hidden")
+        $("#network-vis").css("overflow", "hidden")
         // $("#network-vis").css("width","500px")
-        $('.ui-dialog').css("width","500px") 
+        $('.ui-dialog').css("width", "360px")
         // $(".ui-dialog-title").css("width","500px")      
       });
     });
 
-    
+
     function checkSpatialIntersection(l1, l2) {
       intersection = turf.lineIntersect(l1.toGeoJSON(), l2.toGeoJSON());
       return intersection;
@@ -119,12 +119,12 @@
               intersection = checkSpatialIntersection(lines[index], lines[jndex]).features
               if (intersection.length > 0) {
                 // push to edges
+                edges.push({
+                  "target": id[index],
+                  "source": id[jndex],
+                  "value": 2
+                })
               }
-              edges.push({
-                "target": id[index],
-                "source": id[jndex],
-                "value": 1
-              })
             }
 
           }
@@ -140,22 +140,22 @@
 
     function plotNetwork(net) {
 
-      var width = 300,
-        height = 250;
+      let width = 360,
+        height = 360;
 
-      var color = d3.scale.category20();
+      let color = d3.scale.category20();
 
-      var force = d3.layout.force()
+      let force = d3.layout.force()
         .charge(-120)
         .linkDistance(30)
         .size([width, height]);
 
-      var svg = d3.select("#network-vis").append("svg")
+      let svg = d3.select("#network-vis").append("svg")
         .attr("width", width)
         .attr("height", height);
 
-      var graph = net;
-      var nodeMap = {};
+      let graph = net;
+      let nodeMap = {};
 
       graph.nodes.forEach(function (d) {
         nodeMap[d.name] = d;
@@ -170,7 +170,7 @@
         .links(graph.edges)
         .start();
 
-      var link = svg.selectAll(".link")
+      let link = svg.selectAll(".link")
         .data(graph.edges)
         .enter().append("line")
         .attr("class", "link")
@@ -178,7 +178,7 @@
           return Math.sqrt(d.value) + 1;
         });
 
-      var node = svg.selectAll(".node")
+      let node = svg.selectAll(".node")
         .data(graph.nodes)
         .enter().append("circle")
         .attr("class", "node")
@@ -218,37 +218,38 @@
 
     }
 
-    findTracksAtTime = function(ids, times, time_now){
+    findTracksAtTime = function (ids, times, time_now) {
       existingTracks = []
       for (let index = 0; index < times.length; index++) {
 
         min_time = times[index][0];
 
-        if (time_now >= min_time){
+        if (time_now >= min_time) {
           existingTracks.push([ids[index], min_time, times[index][1]])
-        }
-        else{
+        } else {
           break;
         }
-        
+
       }
       return existingTracks
     }
-
+    // track.id
     datageojson = []
     $.ajax({
       dataType: "json",
-      url: "./data/output1.geojson",
+      url: "./data/data_clipped_18.geojson",
       success: function (data1) {
         // debugger;
-        prevId = ''
-        i = 0;
-        len = data1.features.length;
-        $(data1.features).each(function (key, data2) {
-          id = data2.properties['track.id'];
+        let prevId = ''
+        let i = 0;
+        let len = data1.features.length;
+        data1 = data1.features;
+        $(data1).each(function (key, data2) {
+          // debugger;
+          id = data2.properties['user'];
 
-          lat = data2.geometry.coordinates[1]
-          lng = data2.geometry.coordinates[0]
+          lat = data2.geometry.coordinates[0][1]
+          lng = data2.geometry.coordinates[0][0]
           time = Date.parse(data2.properties['time']) / 1000
           /*For same id putting lat lngs together*/
           if (prevId == '') {
@@ -287,9 +288,10 @@
           i++
         });
         // console.log(datageojson);
+        // center 39.8979/116.2422
+        const map = L.map('mapid').setView([39.9461901,116.2743308], 11);
 
-        const map = L.map('mapid').setView([51.18, 6.4], 12);
-        var Stadia_AlidadeSmoothDark = L.tileLayer(
+        let Stadia_AlidadeSmoothDark = L.tileLayer(
           'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
             maxZoom: 20,
             attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
@@ -301,7 +303,9 @@
         // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         // }).addTo(map);
-        getTimeStrFromUnix = function (t, e = "s") {
+        
+
+        const getTimeStrFromUnix = function (t, e = "s") {
           t = parseInt(1e3 * t);
           let i, n = new Date(t),
             a = n.getFullYear(),
@@ -347,8 +351,8 @@
           plines.push(L.polyline(p))
           times.push([t[0], t[t.length - 1]])
           // sorting based on the miniumum time
-          times.sort(function(a,b){
-            return a[0]-b[0]
+          times.sort(function (a, b) {
+            return a[0] - b[0]
           })
         });
 

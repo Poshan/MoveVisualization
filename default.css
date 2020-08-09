@@ -3,9 +3,11 @@
 }
 #opener{
   position: absolute;
-  top: 20px;
-  left: 50px;
+  top: 220px;
+  left: 5px;
   z-index: 10000;
+  background-color: #e4c930;
+  font-weight: bolder;
 }
 .ui-widget-header,.ui-state-default, ui-button{  
   background:#e4c930;  
@@ -57,7 +59,7 @@
   position: absolute;
   top: 250px;
   left: 0px;
-  margin-left: 10px;
+  margin-left: 5px;
   padding-left: 0px;
   background-color:#e4c930;
   text-align: left;
@@ -66,14 +68,6 @@
   width: 360px;
   height: 360px;
 }
-#network-vis h2{
-  width: auto;
-  text-align: center;
-  margin: 2px 2px 2px 2px;
-
-  /* background-color: #ffffff */
-  color: #fff;
-}
 
 .network h2{
   width: auto;
@@ -81,7 +75,7 @@
   margin: 2px 2px 2px 2px;
 
   /* background-color: #ffffff */
-  color: #fff;
+  /* color: #fff; */
 }
 
 
@@ -121,7 +115,7 @@ tr {
 }
 
 th {
-  background-color: #634976;
+  background-color: #5b98b4;
   color: #fff;
   white-space: nowrap;
   cursor: pointer;

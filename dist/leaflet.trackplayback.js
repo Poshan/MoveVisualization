@@ -279,9 +279,9 @@
                     isDraw: !1,
                     useCanvas: !0,
                     stroke: !1,
-                    color: "#30abe4",
+                    color: "#5b98b4",
                     fill: !0,
-                    fillColor: "#30abe4",
+                    fillColor: "#5b98b4",
                     opacity: .3,
                     radius: 1
                 },
